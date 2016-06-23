@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
@@ -15,7 +16,7 @@ salary and prints for each employee in that department his name, salary, email a
 doesn’t have an email – in place of that field you should print “n/a” instead, if he doesn’t have an age – print “-1” instead. The salary should
 be printed to two decimal places after the seperator.*/
 
-class Employee{
+class Employee implements Comparable<Employee>{
     String name;
     double salary;
     String position;
@@ -26,6 +27,12 @@ class Employee{
     public Employee(String name, double salary, String position, String department){
         this(name, salary, position, department, "n/a", -1);
     }
+    public Employee(String name, double salary, String position, String department, String email){
+        this(name, salary, position, department, email, -1);
+    }
+    public Employee(String name, double salary, String position, String department, int age){
+        this(name, salary, position, department, "n/a", age);
+    }
 
     public Employee(String name, double salary, String position, String department, String email, int age){
         this.name = name;
@@ -34,6 +41,16 @@ class Employee{
         this.department = department;
         this.email = email;
         this.age = age;
+    }
+
+    @Override
+    public String toString(){
+        return String.format("%s %.2f %s %d", name, salary, email, age);
+    }
+
+    @Override
+    public int compareTo(Employee employee) {
+        return Double.compare(employee.salary, this.salary);
     }
 }
 
@@ -47,7 +64,7 @@ public class Problem04_CompanyRoster {
         try{
             int n = Integer.valueOf(reader.readLine());
             for (int i = 0; i < n; i++) {
-                String[] line = reader.readLine().split("/s+");
+                String[] line = reader.readLine().split("\\s+");
                 String name = line[0];
                 double salary = Double.valueOf(line[1]);
                 String position = line[2];
@@ -56,9 +73,24 @@ public class Problem04_CompanyRoster {
                 if(!departments.containsKey(department)){
                     departments.put(department, salary);
                 }
-                else{
-                    salary += departments.get(department);
-                    departments.replace(department, salary);
+                else {
+                    Double depSalary =salary + departments.get(department);
+                    departments.replace(department, depSalary);
+                }
+
+                if(line.length == 4){
+                    employeeList.add(new Employee(name, salary, position, department));
+                }
+
+                if(line.length == 5){
+                    if(isNumber(line[4])){
+                        int age = Integer.valueOf(line[4]);
+                        employeeList.add(new Employee(name, salary, position, department, age));
+                    }
+                    else {
+                        String email = line[4];
+                        employeeList.add(new Employee(name, salary, position, department, email));
+                    }
                 }
 
                 if(line.length == 6){
@@ -66,21 +98,25 @@ public class Problem04_CompanyRoster {
                     int age = Integer.valueOf(line[5]);
                     employeeList.add(new Employee(name, salary, position, department, email, age));
                 }
-                else{
-                    employeeList.add(new Employee(name, salary, position, department));
-                }
             }
 
             String bestDepartment = departments.entrySet().stream()
                     .max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1)
                     .get().getKey();
 
-            System.out.println("Highest average salary: " + bestDepartment);
-
-
-
-
-        }catch(Exception e){}
+            System.out.println("Highest Average Salary: " + bestDepartment);
+            employeeList.stream()
+                    .filter(employee -> employee.department.equals(bestDepartment))
+                    .sorted()
+                    .forEach(System.out::println);
+        }catch(IOException e){}
     }
-
+    private static boolean isNumber(String number){
+        try{
+            Integer.parseInt(number);
+        }catch(NumberFormatException e){
+            return false;
+        }
+        return true;
+    }
 }

@@ -41,7 +41,6 @@ public class Problem03_OpiniongPoll {
                 int age = Integer.valueOf(line[1]);
                 personList.add(new Person3(name, age));
             }
-
             personList.stream()
                     .filter( person -> person.age > 30)
                     .sorted((person1, person2) -> person1.name.compareTo(person2.name))
