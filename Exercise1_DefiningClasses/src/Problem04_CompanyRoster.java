@@ -55,61 +55,57 @@ class Employee implements Comparable<Employee>{
 }
 
 public class Problem04_CompanyRoster {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
         List<Employee> employeeList = new ArrayList<>();
-        Map<String,Double> departments = new HashMap<>();
+        Map<String, Double> departments = new HashMap<>();
+        int n = Integer.valueOf(reader.readLine());
 
+        for (int i = 0; i < n; i++) {
+            String[] line = reader.readLine().split("\\s+");
+            String name = line[0];
+            double salary = Double.valueOf(line[1]);
+            String position = line[2];
+            String department = line[3];
 
-        try{
-            int n = Integer.valueOf(reader.readLine());
-            for (int i = 0; i < n; i++) {
-                String[] line = reader.readLine().split("\\s+");
-                String name = line[0];
-                double salary = Double.valueOf(line[1]);
-                String position = line[2];
-                String department = line[3];
+            if (!departments.containsKey(department)) {
+                departments.put(department, salary);
+            } else {
+                Double depSalary = salary + departments.get(department);
+                departments.replace(department, depSalary);
+            }
 
-                if(!departments.containsKey(department)){
-                    departments.put(department, salary);
-                }
-                else {
-                    Double depSalary =salary + departments.get(department);
-                    departments.replace(department, depSalary);
-                }
+            if (line.length == 4) {
+                employeeList.add(new Employee(name, salary, position, department));
+            }
 
-                if(line.length == 4){
-                    employeeList.add(new Employee(name, salary, position, department));
-                }
-
-                if(line.length == 5){
-                    if(isNumber(line[4])){
-                        int age = Integer.valueOf(line[4]);
-                        employeeList.add(new Employee(name, salary, position, department, age));
-                    }
-                    else {
-                        String email = line[4];
-                        employeeList.add(new Employee(name, salary, position, department, email));
-                    }
-                }
-
-                if(line.length == 6){
+            if (line.length == 5) {
+                if (isNumber(line[4])) {
+                    int age = Integer.valueOf(line[4]);
+                    employeeList.add(new Employee(name, salary, position, department, age));
+                } else {
                     String email = line[4];
-                    int age = Integer.valueOf(line[5]);
-                    employeeList.add(new Employee(name, salary, position, department, email, age));
+                    employeeList.add(new Employee(name, salary, position, department, email));
                 }
             }
 
-            String bestDepartment = departments.entrySet().stream()
-                    .max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1)
-                    .get().getKey();
+            if (line.length == 6) {
+                String email = line[4];
+                int age = Integer.valueOf(line[5]);
+                employeeList.add(new Employee(name, salary, position, department, email, age));
+            }
+        }
 
-            System.out.println("Highest Average Salary: " + bestDepartment);
-            employeeList.stream()
-                    .filter(employee -> employee.department.equals(bestDepartment))
-                    .sorted()
-                    .forEach(System.out::println);
-        }catch(IOException e){}
+        String bestDepartment = departments.entrySet().stream()
+                .max((entry1, entry2) -> entry1.getValue() >= entry2.getValue() ? 1 : -1)
+                .get().getKey();
+
+        System.out.println("Highest Average Salary: " + bestDepartment);
+        employeeList.stream()
+                .filter(employee -> employee.department.equals(bestDepartment))
+                .sorted()
+                .forEach(System.out::println);
     }
     private static boolean isNumber(String number){
         try{
